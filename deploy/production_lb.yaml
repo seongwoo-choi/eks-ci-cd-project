@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: production-svc-lb
+  labels:
+    app: springboot-app
+    k8s-app: springboot-app
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+spec:
+  type: LoadBalancer
+  selector:
+    role: production
+  ports:
+   - port: 80
+     targetPort: 8085
+     

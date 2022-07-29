@@ -1,0 +1,65 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: project-myeks
+  region: ap-northeast-2
+  version: "1.22"
+
+# AZ
+availabilityZones: ["ap-northeast-2a", "ap-northeast-2b",  "ap-northeast-2c"]
+
+# IAM OIDC & Service Account
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer-controller
+        namespace: kube-system
+      wellKnownPolicies:
+        awsLoadBalancerController: true
+    - metadata:
+        name: ebs-csi-controller-sa
+        namespace: kube-system
+      wellKnownPolicies:
+        ebsCSIController: true
+    - metadata:
+        name: cluster-autoscaler
+        namespace: kube-system
+      wellKnownPolicies:
+        autoScaler: true
+
+# Managed Node Groups
+managedNodeGroups:
+  # On-Demand Instance
+  - name: production
+    instanceType: t2.medium
+    minSize: 1
+    desiredCapacity: 2
+    labels: { role: production }
+    maxSize: 3
+    privateNetworking: true
+    ssh:
+      allow: true
+      publicKeyPath: ./keypair/myssh.pub
+    availabilityZones: ["ap-northeast-2a", "ap-northeast-2b", "ap-northeast-2c"]
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        albIngress: true
+        cloudWatch: true
+        ebs: true
+# Fargate Profiles
+# fargateProfiles:
+#   - name: fg-1
+#     selectors:
+#     - namespace: dev
+#       labels:
+#         env: fargate
+        
+        
+# CloudWatch Logging
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
+    

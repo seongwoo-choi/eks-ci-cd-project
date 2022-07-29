@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: springboot-app
+    role: production
+  name: production-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      role: production
+  template:
+    metadata:
+      labels:
+        role: production
+    spec:
+      affinity: 
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - production
+      containers:
+        - name: myweb
+          image: how0326/tomcat:6
+          ports:
+            - containerPort: 8085
+            
